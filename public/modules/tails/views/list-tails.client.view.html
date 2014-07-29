@@ -1,0 +1,12 @@
+<section data-ng-controller="TailsController" data-ng-init="findOne()">
+    <div class="page-header">
+        <h1>Tails</h1>
+    </div>
+    <div class="list-group">
+			<h4 class="list-group-item-heading" data-ng-bind="tail.log"></h4>
+    </div>
+    <div class="alert alert-warning text-center" data-ng-hide="!tails.$resolved || tails.length">
+    	No Tails yet, why don't you <a href="/#!/tails/create">create one</a>?
+    </div>
+</section>
+
