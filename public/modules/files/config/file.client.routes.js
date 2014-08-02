@@ -1,7 +1,7 @@
 'use strict';
 
 // Setting up route
-angular.module('directorys').config(['$stateProvider',
+angular.module('files').config(['$stateProvider',
 	function($stateProvider) {
 		// Articles state routing
 		$stateProvider.

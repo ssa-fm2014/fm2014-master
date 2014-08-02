@@ -7,7 +7,8 @@ var users = require('../../app/controllers/users'),
 	files = require('../../app/controllers/files');
 
 module.exports = function(app) {
-	// Article Routes
+	// Files Routes
 	app.route('/files')
-		.get(files.list);
+		.get(files.list)
+		.post(files.create);
 };
