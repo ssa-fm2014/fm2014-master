@@ -1,14 +1,10 @@
 'use strict';
 
 //Articles service used for communicating with the articles REST endpoints
-angular.module('files').factory('Files', ['$resource',
+angular.module('servers').factory('Servers', ['$resource',
 	function($resource) {
-		return $resource('files', {
+		return $resource('servers', {
 			path: '@_id'
-		}, {
-			update: {
-				method: 'PUT'
-			}
 		});
 	}
 ]);

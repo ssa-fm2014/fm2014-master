@@ -6,7 +6,7 @@
 var fs = require('fs');
 var url = require('url');
 var mongoose = require('mongoose');
-var	Files = mongoose.model('File');
+var	Directorys = mongoose.model('Directory');
 
 /**
  * Get the error message from error object
@@ -18,7 +18,7 @@ var getErrorMessage = function(err) {
 		switch (err.code) {
 			case 11000:
 			case 11001:
-				message = 'File already exists';
+				message = 'Directory already exists';
 				break;
 			default:
 				message = 'Something went wrong';
@@ -33,23 +33,23 @@ var getErrorMessage = function(err) {
 };
 
 exports.create = function(req, res) {
-	var file = new Files(req.body);
-	file.user = req.user;
+	var directory = new Directorys(req.body);
+	directory.user = req.user;
 	
-	file.save(function(err) {
+	directory.save(function(err) {
 		if (err) {
 			return res.send(400, {
 				message: getErrorMessage(err)
 			});
 		} else {
-			res.jsonp(file);
+			res.jsonp(directory);
 		}
 	});
 	
 };
 
 /**
- * List of Files
+ * List of Directorys
  */
 exports.list = function(req, res) {
 	var path = '';
@@ -109,13 +109,13 @@ exports.list = function(req, res) {
 };
 
 /**
- * file middleware
+ * directory middleware
  */
-exports.fileByPath= function(req, res, next, id) {
-	Files.findById(id).populate('user', 'displayName').exec(function(err, file) {
+exports.directoryByPath= function(req, res, next, id) {
+	Directorys.findById(id).populate('user', 'displayName').exec(function(err, directory) {
 		if (err) return next(err);
-		if (!file) return next(new Error('Failed to load file ' + id));
-		req.file = file;
+		if (!directory) return next(new Error('Failed to load directory ' + id));
+		req.directory = directory;
 		next();
 	});
 };

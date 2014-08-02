@@ -4,11 +4,9 @@
  * Module dependencies.
  */
 var users = require('../../app/controllers/users'),
-	files = require('../../app/controllers/files');
-
+servers	= require('../../app/controllers/servers');
 module.exports = function(app) {
-	// Files Routes
-	app.route('/files')
-		.get(files.list)
-		.post(files.create);
+
+	app.route('/servers')
+		.get(servers.list);
 };

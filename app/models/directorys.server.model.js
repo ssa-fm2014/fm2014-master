@@ -9,10 +9,22 @@ var mongoose = require('mongoose'),
 /**
  * File Schema
  */
-var FileSchema = new Schema({
+var DirectorySchema = new Schema({
 	created: {
 		type: Date,
 		default: Date.now
+	},
+	ip: {
+		type: String,
+		default: '',
+		trim: true,
+		required: 'server ip cannot be blank'
+	},
+	port: {
+		type: String,
+		default: '',
+		trim: true,
+		required: 'server port cannot be blank'
 	},
 	path: {
 		type: String,
@@ -56,4 +68,4 @@ var FileSchema = new Schema({
 	}
 });
 
-mongoose.model('File', FileSchema);
+mongoose.model('Directory', DirectorySchema);
