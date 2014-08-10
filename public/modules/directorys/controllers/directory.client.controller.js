@@ -1,6 +1,7 @@
 'use strict';
 
-angular.module('directorys').controller('DirectoryController', ['$scope', '$stateParams', '$location', 'Authentication', 'Directorys', 'Servers',
+angular.module('directorys').controller('DirectoryController', 
+		['$scope', '$stateParams', '$location', 'Authentication', 'Directorys', 'Servers',
 	function($scope, $stateParams, $location, Authentication, Directorys, Servers) {
 		$scope.authentication = Authentication;
 
@@ -8,11 +9,10 @@ angular.module('directorys').controller('DirectoryController', ['$scope', '$stat
 			$scope.servers = Servers.query();
 		};
 		
-		$scope.findDirectoryList = function($path, $name, $parent) {
+		$scope.findDirectoryList = function($sid, $path) {
 			$scope.directorys = Directorys.query({
-				path : $path,
-				name : $name,
-				parent : $parent
+				sid : $sid,
+				path : $path
 			});
 		};
 		

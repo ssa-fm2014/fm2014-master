@@ -4,19 +4,19 @@
 	</div>
 	
 	<div class="row">
-		<div class="col-xs-3" data-ng-init="findServerList()">
+		<div class="col-xs-2" data-ng-init="findServerList()">
 			<h4>Server List</h4>
 			<div class="list-group">
-				<a data-ng-repeat="server in servers" class="list-group-item">
+				<a data-ng-repeat="server in servers" data-ng-click="findDirectoryList(server.id)" class="list-group-item">
 					<h4 class="list-group-item-heading" data-ng-bind="server.name"></h4>
 				</a>
 			</div>
 		</div>
 		
-		<div class="col-xs-4" data-ng-init="findDirectoryList()">
+		<div class="col-xs-3">
 			<h4>Directory List</h4>
 			<div class="list-group">
-				<a data-ng-repeat="dir in directorys" data-ng-click="find(dir.path, dir.name, dir.parent)" class="list-group-item">
+				<a data-ng-repeat="dir in directorys" data-ng-click="findDirectoryList(dir.server, dir.path)" class="list-group-item">
 					<h4 class="list-group-item-heading" data-ng-bind="dir.name"></h4>
 				</a>
 			</div>
@@ -24,7 +24,7 @@
 		
 		<div class="col-xs-1"></div>
 
-		<div class="col-xs-3">
+		<div class="col-xs-2">
 			<h4>Directory Info</h4>
 			<div class="col-md-10">
 				<form class="form-horizontal" data-ng-submit="create()" novalidate>
