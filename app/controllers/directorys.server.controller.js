@@ -65,13 +65,13 @@ var parseResult = function(serverid, path, data) {
 var getConnectInfo = function(sid) {
 	switch(sid) {
 	case 'server1':
-		return {host: '192.168.0.94',port: '22',username: 'kihoon',password: 'kkh'};
+		return {host: 'kiup.dlinkddns.com',port: '7011',username: 'kiup',password: 'kiup1234'};
 	case 'server2':
-		return {host: '192.168.0.94',port: '22',username: 'kihoon',password: 'kkh'};
+		return {host: 'kiup.dlinkddns.com',port: '7013',username: 'kanghyuk',password: 'abcd1234'};
 	case 'server3':
-		return {host: '192.168.0.94',port: '22',username: 'kihoon',password: 'kkh'};
+		return {host: 'kiup.dlinkddns.com',port: '7015',username: 'kihoon',password: 'kihoon1234'};
 	default :
-		return {host: '192.168.0.94',port: '22',username: 'kihoon',password: 'kkh'};
+		return {host: 'kiup.dlinkddns.com',port: '7011',username: 'kiup',password: 'kiup1234'};
 	}
 };
 
