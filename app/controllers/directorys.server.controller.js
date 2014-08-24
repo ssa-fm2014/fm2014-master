@@ -48,7 +48,7 @@ var parseResult = function(serverid, path, data) {
 	
 	var result = [];
 	if(path !== '/') {
-		result.push({'name' : '..', 'path' : path+'..', 'server' : serverid});
+		result.push({'name' : '..', 'path' : path+'..', 'serverId' : serverid});
 		path += '/';
 	}
 	
@@ -56,7 +56,7 @@ var parseResult = function(serverid, path, data) {
 		if(datasplits[k].charAt(0) === 'd' && datasplits[k].charAt(7) === 'r') {
 			var dirinfo = datasplits[k].split(' ');
 			var dirName = dirinfo[dirinfo.length -1];
-			result.push({'name' : dirName, 'path' : path+dirName, 'server' : serverid});
+			result.push({'name' : dirName, 'path' : path+dirName, 'serverId' : serverid});
 		}
 	}
 	return result;
@@ -77,6 +77,9 @@ var getConnectInfo = function(sid) {
 
 var myExec = function(conn, res, serverid, path) {
 	var command = 'ls -l '+path;
+	
+	console.log(command);
+	
 	conn.exec(command, function(err, stream) {
 		if (err) throw err;
 		stream.on('data', function(data) {
@@ -108,7 +111,9 @@ var connectionMap = {};
 var connectionFactory = function(res, serverid, path) {
 	var con = connectionMap[serverid];
 	
-	if(con === null || con === undefined) {
+	console.log(con);
+	
+	if(con === null || con === undefined || con._state==='closed') {
 		console.log('new connect..');
 		var connection = connect(res, serverid, path);
 		connectionMap[serverid] = connection;
@@ -117,7 +122,6 @@ var connectionFactory = function(res, serverid, path) {
 		console.log('old connect..');
 		myExec(con, res, serverid, path);
 	}
-	console.log(con);
 };
 
 /**
@@ -137,31 +141,4 @@ exports.list = function(req, res) {
 	}
 	
 	connectionFactory(res, serverid, path);
-};
-
-exports.create = function(req, res) {
-	var directory = new Directorys(req.body);
-	directory.user = req.user;
-	
-	directory.save(function(err) {
-		if (err) {
-			return res.send(400, {
-				message: getErrorMessage(err)
-			});
-		} else {
-			res.jsonp(directory);
-		}
-	});
-};
-
-/**
- * directory middleware
- */
-exports.directoryByPath= function(req, res, next, id) {
-	Directorys.findById(id).populate('user', 'displayName').exec(function(err, directory) {
-		if (err) return next(err);
-		if (!directory) return next(new Error('Failed to load directory ' + id));
-		req.directory = directory;
-		next();
-	});
 };

@@ -10,6 +10,7 @@ angular.module('directorys').controller('DirectoryController',
 		};
 		
 		$scope.findDirectoryList = function($sid, $path) {
+			console.log('$sid : ' + $sid);
 			if($sid === null || $sid === undefined) {
 				$scope.directorys = [];
 			}
