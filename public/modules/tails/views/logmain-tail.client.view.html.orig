@@ -1,33 +1,37 @@
-	<section data-ng-controller="TailsController"
-		<div class="page-header">
-		<h1>log Viewer</h1>
-		</div>
-		<div class="col-md-12">
-			<form class="form-horizontal" data-ng-submit="execute()" novalidate>
-				<fieldset>
-					<div class="form-group">
-						<label class="control-label" for="Command 입력">Command</label>
-						<div class="controls">
-							<input type="text" data-ng-model="command" id="command" class="form-control" placeholder="Command 입력" required>
-						</div>
+<section data-ng-controller="TailsController">
+	<div class="page-header">
+<<<<<<< HEAD
+		<h1>Tail Command</h1>
+=======
+		<h1>Log Viewer</h1>
+>>>>>>> 81d65eb7ba0a16c43a42a64abebed34a2e2802ec
+	</div>
+	<div class="col-md-12">
+		<form class="form-horizontal" data-ng-submit="execute()" novalidate>
+			<fieldset>
+				<div class="form-group">
+					<label class="control-label" for="Command 입력">Command</label>
+					<div class="controls">
+						<input type="text" data-ng-model="command" id="command" class="form-control" placeholder="Command 입력" required>
 					</div>
-					<div class="form-group">
-						<label class="control-label" for="Grep String 입력">Grep String</label>
-						<div class="controls">
-							<input type="text" data-ng-model="grepString" id="grepString" class="form-control" placeholder="Grep String 입력" required>
-						</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label" for="Grep String 입력">Grep String</label>
+					<div class="controls">
+						<input type="text" data-ng-model="grepString" id="grepString" class="form-control" placeholder="Grep String 입력" required>
 					</div>
-					<div class="form-group">
-						<input type="submit" class="btn btn-default">
-					</div>
-					<div data-ng-show="error" class="text-danger">
-						<strong data-ng-bind="error"></strong>
-					</div>
-				</fieldset>
-			</form>
-			<textarea rows="30" cols="120" readonly='readonly'>
-				GET /modules/tails/controllers/tails.client.controller.js 304 3.002 ms - -
-				GET /modules/tails/services/tails.client.service.js 304 4.628 ms - -
+				</div>
+				<div class="form-group">
+					<input type="submit" class="btn btn-default">
+				</div>
+				<div data-ng-show="error" class="text-danger">
+					<strong data-ng-bind="error"></strong>
+				</div>
+			</fieldset>
+		</form>
+		<textarea rows="30" cols="120" readonly='readonly'>
+			GET /modules/tails/controllers/tails.client.controller.js 304 3.002 ms - -
+			GET /modules/tails/services/tails.client.service.js 304 4.628 ms - -
 			GET /modules/users/config/users.client.config.js 304 12.869 ms - -
 			GET /modules/users/config/users.client.routes.js 304 2.708 ms - -
 			GET /modules/users/controllers/authentication.client.controller.js 304 2.580 ms - -

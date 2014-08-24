@@ -9,7 +9,7 @@ var mongoose = require('mongoose'),
 /**
  * File Schema
  */
-var DirectorySchema = new Schema({
+var CrontabSchema = new Schema({
 	created: {
 		type: Date,
 		default: Date.now
@@ -24,15 +24,34 @@ var DirectorySchema = new Schema({
 		trim: true,
 		required: 'path cannot be blank'
 	},
-	cuser: {
+	minute: {
 		type: String,
+		default: '*',
 		trim: true
 	},
-	cdate: {
-		type: String
-	},
-	comments: {
+	hour: {
 		type: String,
+		default: '*',
+		trim: true
+	},
+	day: {
+		type: String,
+		default: '*',
+		trim: true
+	},
+	month: {
+		type: String,
+		default: '*',
+		trim: true
+	},
+	week: {
+		type: String,
+		default: '*',
+		trim: true
+	},
+	command: {
+		type: String,
+		default: '',
 		trim: true
 	},
 	user: {
@@ -41,4 +60,4 @@ var DirectorySchema = new Schema({
 	}
 });
 
-mongoose.model('Directory', DirectorySchema);
+mongoose.model('Crontab', CrontabSchema);
