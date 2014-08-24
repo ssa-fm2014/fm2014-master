@@ -7,5 +7,6 @@ angular.module('tails').run(['Menus',
 		Menus.addMenuItem('topbar', 'Tails', 'tails', 'dropdown', '/tails');
 		Menus.addSubMenuItem('topbar', 'tails', 'List Tails', 'tails');
 		Menus.addSubMenuItem('topbar', 'tails', 'Log Main', 'tails/logmain');
+		Menus.addSubMenuItem('topbar', 'tails', 'ssh Tail', 'tails/sshTail');
 	}
 ]);

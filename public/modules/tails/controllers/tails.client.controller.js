@@ -1,8 +1,8 @@
 'use strict';
 
 // Tails controller
-angular.module('tails').controller('TailsController', ['$scope', '$stateParams', '$location', 'Authentication', 'Tails',
-	function($scope, $stateParams, $location, Authentication, Tails ) {
+angular.module('tails').controller('TailsController', ['$scope', '$stateParams', '$location', 'Authentication', 'Tails', 'Servers',
+	function($scope, $stateParams, $location, Authentication, Tails, Servers ) {
 		$scope.authentication = Authentication;
 
 
@@ -22,48 +22,85 @@ angular.module('tails').controller('TailsController', ['$scope', '$stateParams',
 			});
 		};
 
+
+
+
 		// Execute Command
-		$scope.execute = function() {
-			// $location.path('tails?command="'+this.command+'"');
-			// $stateParams.comand = this.command;
-			var tail = new Tails({
-				command: this.command
-			});
+		$scope.execute = function($sid, $path) {
+
+			if($stateParams.source !== undefined){
+				$stateParams.source.close();
+			}
+		
+			$stateParams.source = new window.EventSource('/tails?sid='+$sid+'&path='+$path+'&fileName='+this.command+'&grepString='+this.grepString);	
+
+			var handleCallback = function(msg){
+				console.log('handleCallback');
+				// console.log(msg.totalSize);
+				var tailObject = {};
+				tailObject = JSON.parse(msg.data);
 
 
-			tail.$save(function(response) {
-				console.log(response);
-				$location.path('tails/' + response._id);
-			}, function(errorResponse) {
-				$scope.error = errorResponse.data.message;
-			});
+				console.log(tailObject);
+			};
+
+			$stateParams.source.addEventListener('message', handleCallback, false);
 
 
-			// $scope.tail = tail;
-
-			// console.log('좀 보자!! 이거 나오는줄 알았으면 고생안했지 아마? ㅋㅋㅋ START');
-			// console.log('$scope');
-			// console.log($scope);
-
-			// console.log('$stateParams');
-			// console.log($stateParams);
-
-			// console.log('$location');
-			// console.log($location);
-
-			// console.log('Tails');
-			// console.log(Tails);
-
-			// console.log('this');
-			// console.log(this);
-
-			// console.log('좀 보자!! 이거 나오는줄 알았으면 고생안했지 아마? ㅋㅋㅋ START');
-
-			// Tails.body = {aaa : 'aaa'};
-
-			// $location.path('tails');
+			console.log('execute');
 		};
 
 
+		$scope.findServerList = function() {
+			$scope.servers = Servers.query();
+		};
+
+		$scope.findDirectoryList = function($sid, $path) {
+// this.command
+// this.grepString
+			var folderPath = '/home/kanghyuk/testLog';
+
+			if($path === undefined){
+				$scope.tails = Tails.query({
+					sid : $sid,
+					path : folderPath
+				});
+			}
+			else{
+
+				if($stateParams.source !== undefined){
+					$stateParams.source.close();
+				}
+			
+				$stateParams.source = new window.EventSource('/tails?sid='+$sid+'&path='+folderPath+'&fileName='+$path+'&grepString='+'');	
+
+				var handleCallback = function(msg){
+					console.log('handleCallback');
+					// console.log(msg.totalSize);
+					var tailObject = {};
+					tailObject = JSON.parse(msg.data);
+
+					if(tailObject.stats === 'RC'){
+						$stateParams.source.close();
+
+					}
+					else if(tailObject.stats === 'Succ'){
+						console.log('tailObject.stats : ' + tailObject.stats);
+						var oldHtml = angular.element(document.querySelector('#content')).html();
+						angular.element(document.querySelector('#content')).html(oldHtml+'<br>'+tailObject.totalString);		
+					}
+					console.log(tailObject);
+
+		
+					// angular.element(document.querySelector('#content')).text('test');
+				};
+
+				$stateParams.source.addEventListener('message', handleCallback, false);
+			}
+
+
+
+
+		};
 	}
 ]);

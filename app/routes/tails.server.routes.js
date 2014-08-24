@@ -6,11 +6,17 @@ module.exports = function(app) {
 
 	// Tails Routes
 	app.route('/tails')
-		.get(tails.execute)
+		.get(tails.controll)
+		// .get(tails.execute)
 		.post(tails.executePost);
 
-	app.route('/tails/:tailId')
-		.get(tails.read);
+	app.route('/tails/sshTail')
+		.get(tails.list);
+
+	// app.route('/tails/:tailId')
+	// 	.get(tails.execute)
+	// 	.post(tails.execute);
+
 
 	// app.route('/tailspost')	
 	// 	.post(tails.executePost);

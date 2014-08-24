@@ -13,9 +13,9 @@ angular.module('tails').config(['$stateProvider',
 			url: '/tails/logmain',
 			templateUrl: 'modules/tails/views/logmain-tail.client.view.html'
 		})
-   	   .state('viewTails', {
-			url: '/tails/:tailId',
-			templateUrl: 'modules/tails/views/list-tails.client.view.html'
+  	   .state('sshTails', {
+			url: '/tails/sshTail',
+			templateUrl: 'modules/tails/views/list-servers.client.view.html'
 		})
 		;
 
