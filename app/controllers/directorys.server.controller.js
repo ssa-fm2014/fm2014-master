@@ -117,6 +117,7 @@ var connectionFactory = function(res, serverid, path) {
 		console.log('old connect..');
 		myExec(con, res, serverid, path);
 	}
+	console.log(con);
 };
 
 /**

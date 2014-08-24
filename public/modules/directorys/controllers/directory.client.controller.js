@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('directorys').controller('DirectoryController', 
-		['$scope', '$stateParams', '$location', 'Authentication', 'Directorys', 'Servers', 'Dirinfos', 'Croninfos',
-	function($scope, $stateParams, $location, Authentication, Directorys, Servers, Dirinfos, Croninfos) {
+		['$scope', '$stateParams', '$location', 'Authentication', 'Directorys', 'Servers',
+	function($scope, $stateParams, $location, Authentication, Directorys, Servers) {
 		$scope.authentication = Authentication;
 
 		$scope.findServerList = function() {
@@ -19,13 +19,13 @@ angular.module('directorys').controller('DirectoryController',
 					path : $path
 				});
 				
-				$scope.dirinfo = Directorys.directoryByPath({
-					
-				});
-				
-				$scope.croninfo = Directorys.directoryByPath({
-					
-				});
+//				$scope.dirinfo = Directorys.directoryByPath({
+//					
+//				});
+//				
+//				$scope.croninfo = Directorys.directoryByPath({
+//					
+//				});
 			}
 		};
 		

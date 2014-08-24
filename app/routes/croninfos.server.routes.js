@@ -16,6 +16,6 @@ module.exports = function(app) {
 		.put(users.requiresLogin, croninfos.update)
 		.delete(users.requiresLogin, croninfos.delete);
 	
-	app.param('serverId', croninfos.serverId);
-	app.param('path', 	  croninfos.path);
+	//app.param('serverId', croninfos.serverId);
+	//app.param('path', 	  croninfos.path);
 };

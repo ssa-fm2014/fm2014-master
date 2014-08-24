@@ -17,6 +17,6 @@ module.exports = function(app) {
 		.put(users.requiresLogin, dirinfos.update)
 		.delete(users.requiresLogin, dirinfos.delete);
 	
-	app.param('serverId', dirinfos.serverId);
-	app.param('path', 	  dirinfos.path);
+	//app.param('serverId', dirinfos.serverId);
+	//app.param('path', 	  dirinfos.path);
 };
