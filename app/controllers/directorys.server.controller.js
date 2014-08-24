@@ -5,8 +5,6 @@
  */
 var fs = require('fs');
 var url = require('url');
-var mongoose = require('mongoose');
-var	Directorys = mongoose.model('Directory');
 var Connection = require('ssh2');
 /**
  * Get the error message from error object
@@ -32,8 +30,7 @@ var getErrorMessage = function(err) {
 	return message;
 };
 
-
-var parseResult = function(serverid, path, data) {
+var parseResult = function(serverId, path, data) {
 	var datasplits = [];
 	var str='';
 	for(var i=0; i<data.length; i++) {
@@ -48,7 +45,7 @@ var parseResult = function(serverid, path, data) {
 	
 	var result = [];
 	if(path !== '/') {
-		result.push({'name' : '..', 'path' : path+'..', 'server' : serverid});
+		result.push({'name' : '..', 'path' : path+'..', 'serverId' : serverId});
 		path += '/';
 	}
 	
@@ -56,7 +53,9 @@ var parseResult = function(serverid, path, data) {
 		if(datasplits[k].charAt(0) === 'd' && datasplits[k].charAt(7) === 'r') {
 			var dirinfo = datasplits[k].split(' ');
 			var dirName = dirinfo[dirinfo.length -1];
-			result.push({'name' : dirName, 'path' : path+dirName, 'server' : serverid});
+			result.push({'name'    : dirName, 
+						 'path'    : path+dirName, 
+						 'serverId': serverId});
 		}
 	}
 	return result;
@@ -65,29 +64,29 @@ var parseResult = function(serverid, path, data) {
 var getConnectInfo = function(sid) {
 	switch(sid) {
 	case 'server1':
-		return {host: '192.168.0.94',port: '22',username: 'kihoon',password: 'kkh'};
+		return {host: 'kiup.dlinkddns.com',port: '7011',username: 'kiup',password: 'kiup1234'};
 	case 'server2':
-		return {host: '192.168.0.94',port: '22',username: 'kihoon',password: 'kkh'};
+		return {host: 'kiup.dlinkddns.com',port: '7013',username: 'kanghyuk',password: 'abcd1234'};
 	case 'server3':
-		return {host: '192.168.0.94',port: '22',username: 'kihoon',password: 'kkh'};
+		return {host: 'kiup.dlinkddns.com',port: '7015',username: 'kihoon',password: 'kihoon1234'};
 	default :
-		return {host: '192.168.0.94',port: '22',username: 'kihoon',password: 'kkh'};
+		return {host: 'kiup.dlinkddns.com',port: '7011',username: 'kiup',password: 'kiup1234'};
 	}
 };
 
-var myExec = function(conn, res, serverid, path) {
+var myExec = function(conn, res, serverId, path) {
 	var command = 'ls -l '+path;
 	conn.exec(command, function(err, stream) {
 		if (err) throw err;
 		stream.on('data', function(data) {
-			res.jsonp(parseResult(serverid, path, data.toString()));
+			res.jsonp(parseResult(serverId, path, data.toString()));
 		}).stderr.on('data', function(data) {
 			console.log('STDERR: ' + data);
 		});
 	});
 };
 
-var connect = function(res, serverid, path) {
+var connect = function(res, serverId, path) {
 	var connection = new Connection();
 	connection.on('connect', function() {
 		console.log('Connection :: connect');
@@ -95,35 +94,36 @@ var connect = function(res, serverid, path) {
 	connection.on('ready', function() {
 		console.log('Connection :: ready');
 		
-		myExec(connection, res, serverid, path);
+		myExec(connection, res, serverId, path);
 	});
 	connection.on('error', function(err) {
 		console.log('Connection :: error :: ' + err);
 	});
-	connection.connect(getConnectInfo(serverid));
+	connection.connect(getConnectInfo(serverId));
 	return connection;
 };
 
 var connectionMap = {};
-var connectionFactory = function(res, serverid, path) {
-	var con = connectionMap[serverid];
+var connectionFactory = function(res, serverId, path) {
+	var con = connectionMap[serverId];
 	
 	if(con === null || con === undefined) {
-		console.log('new connect..');
-		var connection = connect(res, serverid, path);
-		connectionMap[serverid] = connection;
+		var connection = connect(res, serverId, path);
+		connectionMap[serverId] = connection;
 	}
 	else {
-		console.log('old connect..');
-		myExec(con, res, serverid, path);
+		myExec(con, res, serverId, path);
 	}
 };
 
 /**
- * List of Directorys
+ * List of Directorys{
+					sid : $sid,
+					path : $path
+				}
  */
 exports.list = function(req, res) {
-	var serverid = req.param('sid');
+	var serverId = req.param('sid');
 	var path = req.param('path');
 	
 	if(path === null || path === undefined) {
@@ -135,32 +135,5 @@ exports.list = function(req, res) {
 		path = '/' + paths.join('/');
 	}
 	
-	connectionFactory(res, serverid, path);
-};
-
-exports.create = function(req, res) {
-	var directory = new Directorys(req.body);
-	directory.user = req.user;
-	
-	directory.save(function(err) {
-		if (err) {
-			return res.send(400, {
-				message: getErrorMessage(err)
-			});
-		} else {
-			res.jsonp(directory);
-		}
-	});
-};
-
-/**
- * directory middleware
- */
-exports.directoryByPath= function(req, res, next, id) {
-	Directorys.findById(id).populate('user', 'displayName').exec(function(err, directory) {
-		if (err) return next(err);
-		if (!directory) return next(new Error('Failed to load directory ' + id));
-		req.directory = directory;
-		next();
-	});
+	connectionFactory(res, serverId, path);
 };
