@@ -1,0 +1,97 @@
+<section data-ng-controller="DirectoryController">
+	<div class="page-header">
+		<h1>Crontab Information</h1>
+	</div>
+	
+	<div class="row">
+		<div class="col-xs-2" data-ng-init="findServerList()">
+			<h4>Server List</h4>
+			<select class="form-control" 
+					ng-model="server" 
+					ng-options="server.name for server in servers"
+					ng-change="findDirectoryList(server.id)">
+				<option value=''>[select]</option>
+		    </select>
+		</div>
+		
+		<div class="col-xs-3">
+			<h4>Crontab Target Drictorys</h4>
+			<div class="list-group">
+				<a data-ng-repeat="dir in directorys" data-ng-click="findDirectoryList(dir.serverId, dir.path)" class="list-group-item">
+					<h4 class="list-group-item-heading" data-ng-bind="dir.name"></h4>
+				</a>
+			</div>
+		</div>
+		
+		<div class="col-xs-2">
+			<h4>Crontab Information</h4>
+			<div class="col-md-10">
+				<form class="form-horizontal" data-ng-submit="create()" novalidate>
+					<fieldset>
+						<div class="form-group">
+							<label class="control-label" for="sid">Server ID</label>
+							<div class="controls">
+								<input type="text" data-ng-model="dir.serverId" id="sid" class="form-control" placeholder="Server ID" required>
+							</div>
+							<label class="control-label" for="sname">Server Name</label>
+							<div class="controls">
+								<input type="text" data-ng-model="server.name" id="sname" class="form-control" placeholder="Server Name" required>
+							</div>
+							<label class="control-label" for="path">Path</label>
+							<div class="controls">
+								<input type="text" data-ng-model="path" id="path" class="form-control" placeholder="Directory Path" required>
+							</div>
+							<label class="control-label" for="minute">Minute</label>
+							<div class="controls">
+								<input type="text" data-ng-model="minute" id="minute" class="form-control" placeholder="Minute" required>
+							</div>
+							<label class="control-label" for="hour">Hour</label>
+							<div class="controls">
+								<input type="text" data-ng-model="hour" id="hour" class="form-control" placeholder="Hour" required>
+							</div>
+							<label class="control-label" for="day">Day</label>
+							<div class="controls">
+								<input type="text" data-ng-model="day" id="day" class="form-control" placeholder="Day" required>
+							</div>
+							<label class="control-label" for="month">Month</label>
+							<div class="controls">
+								<input type="text" data-ng-model="month" id="month" class="form-control" placeholder="Month" required>
+							</div>
+							<label class="control-label" for="week">Week</label>
+							<div class="controls">
+								<input type="text" data-ng-model="week" id="week" class="form-control" placeholder="Week" required>
+							</div>
+							<label class="control-label" for="command">Command</label>
+							<div class="controls">
+								<input type="text" data-ng-model="command" id="command" class="form-control" placeholder="Command" required>
+							</div>
+						</div>
+						<div class="form-group">
+							<input type="submit" value="Save" class="btn btn-default">
+						</div>
+						<div data-ng-show="error" class="text-danger">
+							<strong data-ng-bind="error"></strong>
+						</div>
+					</fieldset>
+				</form>
+			</div>
+		</div>
+		<div class="col-xs-3">
+			<h4>Crontab Execution History</h4>
+			<div class="list-group">
+				<a class="list-group-item">
+					<h4 class="list-group-item-heading"></h4>
+				</a>
+				<a class="list-group-item">
+					<h4 class="list-group-item-heading"></h4>
+				</a>
+				<a class="list-group-item">
+					<h4 class="list-group-item-heading"></h4>
+				</a>
+				<a class="list-group-item">
+					<h4 class="list-group-item-heading"></h4>
+				</a>
+			</div>
+		</div>
+	</div>
+</section>
