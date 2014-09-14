@@ -1,0 +1,23 @@
+<section data-ng-controller="PrintController">
+	<div class="page-header">
+		<h1>Print List</h1>
+	</div>
+	
+	<div class="row">
+		<div class="col-xs-2" data-ng-init="findServerList()">
+			<h4>Server List</h4>
+			<select class="form-control" 
+					ng-model="server" 
+					ng-options="server.name for server in servers"
+					ng-change="findDirectoryList(server.id)">
+				<option value=''>[select]</option>
+		    </select>
+		</div>
+		
+		<div class="col-xs-3">
+			<h4>Print Content</h4>
+			<div data-ng-model="article.content" id="content" class="form-control" cols="30" rows="10" placeholder="Content"></div>
+		</div>
+		
+	</div>
+</section>
