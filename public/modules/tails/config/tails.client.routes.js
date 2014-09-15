@@ -20,4 +20,6 @@ angular.module('tails').config(['$stateProvider',
 		;
 
 	}
-]);
+], ['ngClipProvider', function(ngClipProvider) {
+    ngClipProvider.setPath('../../../lib/zeroclipboard/dist/ZeroClipboard.swf');
+}]);

@@ -15,10 +15,41 @@ var  mongoose = require('mongoose'),
 	 Connection = require('ssh2')
 	 ;
 
-
+var RELOAD_ERROR_CODE = 'ADMINISTRATIVELY_PROHIBITED';
+var RECONNECT_CODE = 'RC';
+var NORMAL_CODE = 'NC';
+var TRUNC_SIZE = 100;
 /**
  * Get the error message from error object
  */
+
+
+var getConnectInfo = function(sid) {
+	switch(sid) {
+	case 'server1':
+		return {host: 'kiup.dlinkddns.com',port: '7011',username: 'kiup',password: 'kiup1234'};
+	case 'server2':
+		return {host: 'kiup.dlinkddns.com',port: '7013',username: 'kanghyuk',password: 'abcd1234'};
+	case 'server3':
+		return {host: 'kiup.dlinkddns.com',port: '7015',username: 'kihoon',password: 'kihoon1234'};
+	default :
+		return {host: 'kiup.dlinkddns.com',port: '7011',username: 'kiup',password: 'kiup1234'};
+	}
+};
+
+var getFolderPath = function(sid) {
+	switch(sid) {
+	case 'server1':
+		return {folderpath : ''};
+	case 'server2':
+		return {folderpath : '/home/kanghyuk/testLog'};
+	case 'server3':
+		return {folderpath : ''};
+	default :
+		return {folderpath : ''};
+	}
+};
+
 var getErrorMessage = function(err) {
 	var message = '';
 
@@ -43,43 +74,6 @@ var getErrorMessage = function(err) {
 
 var openConnections = [];
 
-exports.execute = function(req, res) {
-	console.log('exports.tail controller START');
-
-	// console.log(req.query);
-
-	req.socket.setTimeout(Infinity);
-
-
-    res.writeHead(200, {
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive'
-    });
-    res.write('\n');
-
-	var connectionForm = {};
-	connectionForm.res = res;
-	connectionForm.req = req;
-
-	// console.log(connectionForm);
-
-    openConnections.push(connectionForm);
-
-    req.on('close', function() {
-        var toRemove;
-        for (var j =0 ; j < openConnections.length ; j++) {
-            if (openConnections[j].res === res) {
-                toRemove =j;
-                break;
-            } 
-        }
-        openConnections.splice(j,1);
-        console.log(openConnections.length);
-    });
-};
-
-
 var executeTail = function(conn, res, req, serverid, path) {
 	console.log('executeTail function START');
 
@@ -100,7 +94,10 @@ var executeTail = function(conn, res, req, serverid, path) {
 	connectionForm.req = req;
 	connectionForm.conn = conn;
 	connectionForm.serverid = serverid;
-	connectionForm.path = path;
+
+	console.log('path : ' + getFolderPath(serverid).folderpath);
+
+	connectionForm.path = getFolderPath(serverid).folderpath;
 
 	// console.log(connectionForm);
 
@@ -119,203 +116,12 @@ var executeTail = function(conn, res, req, serverid, path) {
     });
 };
 
-var readFile = function(connectionForm){
 
-	console.log('readFile called!!');
-	var tailObject = {};
-	var res = connectionForm.res;
-	var req = connectionForm.req;
-	var conn = connectionForm.conn;
-
-	var startPoint = 0;
-	var lastPoint = 0;
-
-	if(req.body.totalSize !== 0 && req.body.totalSize !== undefined){
-		startPoint = req.body.totalSize;
-	}
-
-	console.log('req.bufferSize : ' + req.bufferSize);
-	startPoint = req.bufferSize;
-
-	console.log('req.count : ' + req.count);
-	if(req.count === undefined){
-		req.count = 0;
-	}else{
-		req.count += 1;
-	}
-
-	if(conn === undefined){
-		return;
-	}
-
-	conn.sftp(function(err, sftp){
-		if (err) {
-			console.log(err);
-			// throw err;
-		}
-		sftp.open(connectionForm.path+'/test.log', 'r', function(err, fd) {
-		    sftp.fstat(fd, function(err, stats) {
-		 	
-		        var bufferSize=stats.size,
-		            chunkSize=1024,
-		            buffer=new Buffer(bufferSize),
-		            bytesRead = 0,
-		            position = bufferSize - 1024;
-
-	            lastPoint = bufferSize;
-	            console.log('bufferSize : ' + bufferSize);
-	            console.log('connectionForm.path : ' + connectionForm.path);
-
-	            if(req.count === 4){
-					console.log('8번째 접속, conn 재요청');
-
-					tailObject.position = lastPoint;
-					tailObject.stats = 'RC';
-					conn.end();
-					connectionForm.res.write('data: '+JSON.stringify(tailObject)+'\n\n');
-					connectionForm.res.flush();
-				}
-
-	            if(position < 0){
-	            	position = 0;
-	            }
-	            console.log('position 2: ' + position);
-
-		        if(startPoint !== 0 && startPoint !== undefined){
-		        	position = startPoint ;
-		        }         
-
-		        tailObject.totalSize = bufferSize;
-	            console.log('bufferSize : ' + bufferSize);
-	            console.log('position : ' + position);
-
-	            req.bufferSize = bufferSize;
-
-	            console.log(position === bufferSize);
-	            if(position === bufferSize){
-	            	console.log('postion == bufferSize');
-	            	tailObject.stats = 'NC';
-	            	connectionForm.res.write('data: '+JSON.stringify(tailObject)+'\n\n');
-					connectionForm.res.flush();
-	            }
-
-		        while (bytesRead + position < bufferSize) {
-		            if ((bytesRead + chunkSize) > bufferSize) {
-		                chunkSize = (bufferSize - bytesRead) ;
-		            }
-
-		            console.log('req.query.grepString : ' + req.query.grepString);
-		            if(req.query.grepString === 'undefined' || req.query.grepString === ''){
-		            	sftp.read(fd, buffer, bytesRead, chunkSize, position, readFileCallBack);
-		            }
-		            else
-		            {
-		            	sftp.read(fd, buffer, bytesRead, chunkSize, position, readFileGrepCallBack);
-		            }
-	            	
-		            bytesRead += chunkSize;
-		            position += chunkSize;
-
-		        }
-		    	sftp.close(fd);
-		    });
-		});
-    });	
-
-
-
-	var position = 0;
-
-	var totalString = '';
-
-	var readFileCallBack = function(err, bytesRead, buffer, position){
-		if (err) console.log('err : ' +  err);
-
-		console.log('readFileCallBack Called !! ');	
-		console.log('buffer : ' + buffer);
-
-		totalString += buffer.toString('utf8', position, bytesRead); 
-		position += bytesRead;
-
-		tailObject.totalString = totalString;
-
-        var lines = totalString.split('\n');
-        lines.pop();
-        lines.forEach(function (line) {
-			tailObject.stats = 'Succ';
-			tailObject.totalString = line;
-			connectionForm.res.write('data: '+JSON.stringify(tailObject)+'\n\n');
-			connectionForm.res.flush();
-
-			console.log('line : ' + line);	            
-        });
-
-  //   	if(req.count === 8){
-		// 	console.log('8번째 접속, conn 재요청');
-
-		// 	tailObject.position = lastPoint;
-		// 	tailObject.stats = 'RC';
-		// 	conn.end();
-		// 	connectionForm.res.write('data: '+JSON.stringify(tailObject)+'\n\n');
-		// 	connectionForm.res.flush();
-
-
-		// }else{
-		// 	tailObject.stats = 'Succ';
-		// 	console.log('tailObject.totalSize : ' + tailObject.totalSize);
-		// 	connectionForm.res.write('data: '+JSON.stringify(tailObject)+'\n\n');
-		// 	connectionForm.res.flush();
-		// }
-
-	};
-
-	var readFileGrepCallBack = function(err, bytesRead, buffer){
-		console.log('readFileGrepCallBack Called !! ');
-
-		if (err) console.log('err : ' +  err);
-
-		totalString += buffer.toString('utf8', position, bytesRead); 
-		position += bytesRead;
-
-		console.log('totalString : ' + totalString);
-		// console.log(totalString.match(req.query.grepString));
-		// console.log(Object.valueOf(totalString.match(req.query.grepString)));
-		if(totalString.indexOf(req.query.grepString) > -1){
-			tailObject.totalString = totalString;
-			tailObject.position = startPoint;
-			connectionForm.res.write('data: '+JSON.stringify(tailObject)+'\n\n');
-			connectionForm.res.flush();
-		}
-	};
-};
-
-setInterval(function() {
-    // we walk through each connection
-    openConnections.forEach(function(connectionForm) {
-    	readFile(connectionForm);
-    	// readFileGrep(connectionForm);
-    });
- 
-}, 1000);
 
 
 exports.executePost = function(req, res) {
 	console.log('exports.executePost controller START');
  
-};
-
-
-var getConnectInfo = function(sid) {
-	switch(sid) {
-	case 'server1':
-		return {host: 'kiup.dlinkddns.com',port: '7011',username: 'kiup',password: 'kiup1234'};
-	case 'server2':
-		return {host: 'kiup.dlinkddns.com',port: '7013',username: 'kanghyuk',password: 'abcd1234'};
-	case 'server3':
-		return {host: 'kiup.dlinkddns.com',port: '7015',username: 'kihoon',password: 'kihoon1234'};
-	default :
-		return {host: 'kiup.dlinkddns.com',port: '7011',username: 'kiup',password: 'kiup1234'};
-	}
 };
 
 
@@ -352,8 +158,8 @@ var parseResult = function(serverid, path, data) {
 
 
 var getFileList = function(conn, res, req, serverid, path) {
-	console.log('getFileList : path : '  + path);
-	var command = 'ls -l '+path;
+	console.log('getFileList : path : '  + getFolderPath(serverid).folderpath);
+	var command = 'ls -l '+getFolderPath(serverid).folderpath;
 	conn.exec(command, function(err, stream) {
 		if (err) throw err;
 		stream.on('data', function(data) {
@@ -365,9 +171,7 @@ var getFileList = function(conn, res, req, serverid, path) {
 	});
 };
 
-var tailingFile = function(conn, res, req, serverid, path) {
-	executeTail(conn, res, req, serverid, path);
-};
+
 
 var tailController = function(conn, res, req, serverid, path) {
 
@@ -382,7 +186,7 @@ var tailController = function(conn, res, req, serverid, path) {
 	}else{
 		console.log('fileName is exist');
 		console.log('get Tail');
-		tailingFile(conn, res, req, serverid, path);
+		executeTail(conn, res, req, serverid, path);
 	}
 };
 
@@ -468,3 +272,188 @@ exports.tailByID = function(req, res, next, id) {
 		next();
 	});
 };
+
+
+
+var readFile = function(connectionForm){
+
+	console.log('readFile called!!');
+	var tailObject = {};
+	var res = connectionForm.res;
+	var req = connectionForm.req;
+	var conn = connectionForm.conn;
+
+	var startPoint = 0;
+	var lastPoint = 0;
+
+	startPoint = req.bufferSize;
+
+	if(req.count === undefined){
+		req.count = 0;
+	}else{
+		req.count += 1;
+	}
+
+	console.log('req.count : ' + req.count);
+	console.log('req.query.totalSize : ' + req.query.totalSize);
+	if(req.query.totalSize !== undefined && req.query.totalSize !== null && req.count === 0){
+
+		console.log('재연결입니다. ');
+		console.log(req.query.totalSize);
+		startPoint = req.query.totalSize;
+	}
+	console.log('startPoint : ' + startPoint);
+
+
+	if(conn === undefined){
+		return;
+	}
+
+	conn.sftp(function(err, sftp){
+		if (err) {
+			console.log(err);
+
+			if(err.reason === RELOAD_ERROR_CODE){
+				console.log('재연결시도합니다.');
+				console.log('우선 연결을 끊습니다.');
+				tailObject.totalSize = startPoint;
+				tailObject.stats = RECONNECT_CODE;
+				conn.end();
+				conn = null;
+				connectionMap[req.param('sid')] = null;
+				connectionForm.res.write('data: '+JSON.stringify(tailObject)+'\n\n');
+				connectionForm.res.flush();
+				return;
+			}else{
+				throw err;
+			}
+		}
+
+		console.log('aaaa' + connectionForm.path);
+
+		sftp.open(connectionForm.path+'/test.log', 'r', function(err, fd) {
+		    sftp.fstat(fd, function(err, stats) {
+		        var bufferSize=stats.size,
+		            chunkSize=1000,
+		            buffer=new Buffer(bufferSize),
+		            bytesRead = 0,
+		            position = bufferSize - 1000;
+
+	            lastPoint = bufferSize;
+	            console.log('connectionForm.path : ' + connectionForm.path);
+
+	            if(position < 0){
+	            	position = 0;
+	            }
+
+		        if(startPoint !== 0 && startPoint !== undefined){
+		        	position = startPoint ;
+		        }         
+
+		        tailObject.totalSize = bufferSize;
+	            console.log('bufferSize : ' + bufferSize);
+	            console.log('position : ' + position);
+
+	            req.bufferSize = bufferSize;
+
+	            console.log(position === bufferSize);
+	            if(position === bufferSize){
+	            	console.log('postion == bufferSize');	            	
+	            	tailObject.stats = NORMAL_CODE;
+	            	connectionForm.res.write('data: '+JSON.stringify(tailObject)+'\n\n');
+					connectionForm.res.flush();
+	            }
+
+		        while (bytesRead + position < bufferSize) {
+		            if ((bytesRead + chunkSize) > bufferSize) {
+		                chunkSize = (bufferSize - bytesRead) ;
+		            }
+
+		            console.log('req.query.grepString : ' + req.query.grepString);
+		            if(req.query.grepString === 'undefined' || req.query.grepString === ''){
+		            	sftp.read(fd, buffer, bytesRead, chunkSize, position, readFileCallBack);
+		            }
+		            else
+		            {
+		            	sftp.read(fd, buffer, bytesRead, chunkSize, position, readFileGrepCallBack);
+		            }
+	            	
+		            bytesRead += chunkSize;
+		            position += chunkSize;
+
+		        }
+		    	sftp.close(fd);
+		    });
+		});
+    });	
+
+
+
+	var position = 0;
+
+	var totalString = '';
+
+	var readFileCallBack = function(err, bytesRead, buffer, position){
+		if (err) console.log('err : ' +  err);
+
+		console.log('readFileCallBack Called !! ');	
+		console.log('buffer : ' + buffer);
+
+
+		console.log('position : ' + position);
+		console.log('bytesRead : ' + bytesRead);
+
+		// totalString += buffer.toString('utf8', position, position + bytesRead); 
+		totalString += buffer.toString('utf8', 0, bytesRead); 
+		position += bytesRead;
+
+
+		console.log('totalString = ' + totalString);
+		tailObject.totalString = totalString;
+
+        var lines = totalString.split('\n');
+        lines.pop();
+        lines.forEach(function (line) {
+			tailObject.stats = 'Succ';
+			tailObject.totalString = line;
+			connectionForm.res.write('data: '+JSON.stringify(tailObject)+'\n\n');
+			connectionForm.res.flush();
+
+			console.log('line : ' + line);	            
+        });
+
+	};
+
+	var readFileGrepCallBack = function(err, bytesRead, buffer){
+		console.log('readFileGrepCallBack Called !! ');
+
+		if (err) console.log('err : ' +  err);
+
+		totalString += buffer.toString('utf8', position, position + bytesRead); 
+		position += bytesRead;
+
+		console.log('totalString : ' + totalString);
+		if(totalString.indexOf(req.query.grepString) > -1){
+
+	        var lines = totalString.split('\n');
+        	lines.pop();
+	        lines.forEach(function (line) {
+				tailObject.stats = 'Succ';
+				tailObject.totalString = line;
+				connectionForm.res.write('data: '+JSON.stringify(tailObject)+'\n\n');
+				connectionForm.res.flush();
+
+				console.log('line : ' + line);	
+	        });
+		}
+	};
+};
+
+setInterval(function() {
+    // we walk through each connection
+    openConnections.forEach(function(connectionForm) {
+    	readFile(connectionForm);
+    	// readFileGrep(connectionForm);
+    });
+ 
+}, 5000);
