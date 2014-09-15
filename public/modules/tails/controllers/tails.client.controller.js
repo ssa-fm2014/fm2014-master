@@ -133,9 +133,25 @@ angular.module('tails').controller('TailsController', ['$scope', '$stateParams',
 
 						console.log('tailObject.stats : ' + tailObject.stats);
 						var oldHtml = angular.element(document.querySelector('#content')).html();
-						console.log(oldHtml);
-						console.log('-------');
-						console.log(oldHtml+dotString+'\n<br>'+tailObject.totalString);
+						if(tailObject.totalString.indexOf('error') > -1){
+							// var splitStrings = tailObject.totalString.split('error');;
+							// var resultString = '';
+							// splitStrings.pop();
+							// splitStrings.forEach(function(splitString) {
+							// 	console.log('---------');
+							// 	console.log(splitString);
+							// 	console.log('---------');
+							// });
+
+							tailObject.totalString = tailObject.totalString.replace(/error/gi, '<div class="errorColor" >ERROR</div>');
+							
+
+							// re = /dream/i;
+							// pos = src.search(re);
+							// document.write(pos);
+						}
+
+
 						angular.element(document.querySelector('#content')).html(oldHtml+dotString+'\n<br>'+tailObject.totalString);		
 					}
 					console.log(tailObject);
